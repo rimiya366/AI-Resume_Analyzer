@@ -1,0 +1,328 @@
+Recruiter: Can you explain your Resume & Job Matcher project?
+
+Your answer:
+
+Certainly.
+
+The Resume & Job Matcher is a Streamlit web application that compares a candidate's resume with a job description using a locally hosted large language model through Ollama.
+
+The main objective of the project is to help job seekers understand how well their resume aligns with a specific job description and identify missing skills or keywords that could improve their ATS compatibility.
+
+One important design decision was to use a local LLM instead of a cloud API, which means resumes are processed on the user's own machine rather than being sent to external services.
+
+Recruiter: Walk me through the workflow.
+
+Your answer:
+
+The application follows a simple pipeline.
+
+The user uploads a resume and a job description.
+The application extracts the text from both documents.
+It creates a structured prompt that contains both texts.
+The prompt is sent to an Ollama model through its REST API.
+The model analyzes both documents.
+The generated report is displayed in Streamlit.
+The user can download the report as a Markdown file.
+
+So, the project combines document processing, prompt engineering, API communication, and web application development.
+
+Recruiter: Why did you use Streamlit?
+
+Your answer:
+
+I chose Streamlit because it allows rapid development of machine learning applications.
+
+Instead of spending time developing HTML, CSS, and JavaScript, I could focus on the NLP workflow and model integration.
+
+It also provides built-in support for:
+
+file upload
+buttons
+progress indicators
+markdown rendering
+download buttons
+
+which significantly reduces development time.
+
+Recruiter: How do you read PDF files?
+
+Your answer:
+
+I used PyMuPDF (fitz).
+
+When a PDF is uploaded, I first read its bytes using
+
+uploaded_file.getvalue()
+
+Then I open it with
+
+fitz.open(stream=pdf_bytes, filetype="pdf")
+
+PyMuPDF parses the document page by page.
+
+For every page I call
+
+page.get_text()
+
+which extracts all textual content.
+
+Finally I concatenate all pages into a single string.
+
+Recruiter: Why did you use getvalue() instead of read()?
+
+Your answer:
+
+Using
+
+uploaded_file.read()
+
+moves the file pointer.
+
+If I try reading the same file again later, it may return an empty result.
+
+Using
+
+uploaded_file.getvalue()
+
+returns the complete file bytes without causing stream exhaustion, making the extraction more reliable.
+
+Recruiter: How do you support TXT files?
+
+Your answer:
+
+If the uploaded file isn't a PDF, I assume it's a text file.
+
+I decode it using
+
+uploaded_file.getvalue().decode(
+    "utf-8",
+    errors="ignore"
+)
+
+The
+
+errors="ignore"
+
+parameter prevents the application from crashing if unsupported characters exist.
+
+Recruiter: Explain the prompt engineering.
+
+Your answer:
+
+Instead of asking the model
+
+"Compare these two files"
+
+I use a structured prompt.
+
+The prompt contains clearly separated sections.
+
+Resume
+
+Job Description
+
+Required Output Format
+
+I also instruct the model to produce four sections:
+
+Fit Score
+Key Strengths
+Missing Skills
+Recommendations
+
+Providing a structured prompt improves consistency and makes the output easier to read.
+
+Recruiter: How do you communicate with the LLM?
+
+Your answer:
+
+I use the Ollama REST API.
+
+I send an HTTP POST request to
+
+http://localhost:11434/api/generate
+
+The request body contains
+
+{
+    "model": model_name,
+    "prompt": prompt,
+    "stream": False
+}
+
+The model processes the prompt and returns a JSON response.
+
+I extract
+
+data["response"]
+
+which contains the generated analysis.
+
+Recruiter: Why did you choose Ollama?
+
+Your answer:
+
+There were three reasons.
+
+First, privacy.
+
+Resumes often contain personal information.
+
+Using a local model ensures the documents never leave the user's computer.
+
+Second, cost.
+
+Ollama is free after downloading the model.
+
+There are no API charges.
+
+Third, flexibility.
+
+Users can switch between different models such as
+
+llama3.2
+mistral
+gemma
+
+without changing the application code.
+
+Recruiter: Why did you add a model selector?
+
+Your answer:
+
+Different users may have different models installed locally.
+
+Instead of hardcoding one model, I added a text input in the sidebar.
+
+This makes the application flexible and reusable.
+
+Recruiter: What happens when the user clicks "Match"?
+
+Your answer:
+
+Several validation steps occur.
+
+First, the application checks whether both files have been uploaded.
+
+If not, a warning is displayed.
+
+Next, it extracts text from both files.
+
+If either document produces empty text, an error message is shown because the file may be image-based or corrupted.
+
+Only after successful validation does the application send the prompt to the language model.
+
+Recruiter: How did you handle errors?
+
+Your answer:
+
+I implemented different exception handlers.
+
+For example,
+
+ConnectionError
+
+If Ollama isn't running, the user receives a message instructing them to start the server.
+
+HTTPError
+
+If the selected model isn't installed, the application suggests pulling the model first.
+
+General Exception
+
+Any unexpected errors are caught and displayed without crashing the application.
+
+This improves robustness.
+
+Recruiter: Why did you use session_state?
+
+Your answer:
+
+Normally Streamlit reruns the entire script after every interaction.
+
+Without
+
+st.session_state
+
+the generated report would disappear.
+
+I store the analysis in
+
+st.session_state["resume_match"]
+
+so that the report remains available and the download button continues to work.
+
+Recruiter: Why Markdown?
+
+Your answer:
+
+Markdown is lightweight and human-readable.
+
+It preserves headings, bullet points, and formatting.
+
+It also allows users to easily edit or convert the report later.
+
+Recruiter: What are the limitations of this project?
+
+Your answer:
+
+Some current limitations include:
+
+It does not support scanned PDFs because OCR is not implemented.
+The ATS score is generated by the language model and is not calculated mathematically.
+Keyword matching relies entirely on the LLM rather than a dedicated NLP algorithm.
+It compares one resume with one job description at a time.
+The application currently supports PDF and TXT files but not DOCX.
+
+These are potential areas for future improvement.
+
+Recruiter: If you had more time, what would you improve?
+
+Your answer:
+
+I would add:
+
+OCR support for scanned resumes.
+Semantic similarity using Sentence Transformers.
+Automatic keyword extraction with spaCy.
+Visual ATS score charts.
+Skill-gap analysis.
+Resume rewriting suggestions.
+PDF report generation.
+Support for DOCX files.
+Batch processing of multiple resumes.
+
+These additions would make the application more comprehensive and reduce reliance on the language model.
+
+Recruiter: What AI concepts does this project demonstrate?
+
+Your answer:
+
+Although I didn't train a machine learning model, this project demonstrates practical AI engineering skills:
+
+Prompt engineering
+LLM integration through REST APIs
+Natural language processing using large language models
+Document parsing
+Handling unstructured text
+Streamlit application development
+Error handling and user experience considerations
+Local AI deployment with Ollama
+
+The focus of the project is integrating an LLM into a usable application rather than building a model from scratch.
+
+What interviewers are looking for
+
+When discussing this project, avoid saying:
+
+"I used ChatGPT to make a resume matcher."
+
+Instead, explain the engineering decisions:
+
+Why you chose a local LLM.
+How the PDF text extraction works.
+Why you used structured prompting.
+How you handled errors and validation.
+How data flows through the application from upload to report generation.
+
+Being able to explain these choices clearly demonstrates that you understand the system beyond just writing or assembling the code.
