@@ -23,9 +23,7 @@ An AI-powered Resume and Job Description Matcher built using Streamlit and Ollam
 
 
 ## Screenshots
-
-(Add screenshots here)
-
+![Streamlit App Screenshot](preview/ai_resume_analyzer_preview.png)
 ## Future Improvements
 
 - DOCX support
