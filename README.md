@@ -24,7 +24,6 @@ An AI-powered Resume and Job Description Matcher built using Streamlit and Ollam
 
 ## Screenshots
 
-(Add screenshots here)
 
 ## Future Improvements
 
